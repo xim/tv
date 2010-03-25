@@ -3,7 +3,6 @@
 from __future__ import with_statement
 
 import os
-import random
 import subprocess
 import sys
 import threading
@@ -19,15 +18,20 @@ from pyroutes import route, application, utils
 from pyroutes.http.response import Response, Redirect
 from pyroutes.template import TemplateRenderer
 
-renderer = TemplateRenderer("templates/base.xml")
-global secret
-secret = hex(random.getrandbits(128))
-global playing
-playing = None
-
 """
 TV over python elns
 """
+
+
+renderer = TemplateRenderer("templates/base.xml")
+global playing
+playing = None
+
+def random_secret(bits=16):
+    with open('/dev/urandom') as f:
+        return f.read(bits).encode('base64').strip().rstrip('=')
+global secret
+secret = random_secret()
 
 class ChannelListingError(Exception):
     pass
@@ -83,7 +87,7 @@ class VLCMonitor(threading.Thread):
             time.sleep(5)
 
         global secret, playing
-        secret = hex(random.getrandbits(128))
+        secret = random_secret()
         playing = None
 
         sys.stderr.write('killing vlc...')
