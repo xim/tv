@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<asx version="3.0" xmlns:t="http://template.sesse.net/" xml:lang="en">
+	<title>TV over haxx</title>
+	<entry>
+		<title t:id="title" />
+		<ref t:id="url" />
+	</entry>
+</asx>
+
