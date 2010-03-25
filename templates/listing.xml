@@ -4,16 +4,6 @@
 		<p>Jeg forstår ikke hva som skjer her! Hva er denne proxy-lenken og denne direktelenken?</p>
 		<p>Svaret er at de gjør (i all hovedsak) det samme. Forklaring av de to:</p>
 		<ul>
-			<li>Proxyside:
-				<ol>
-					<li>Gå inn på siden</li>
-					<li>Det startes opp en prosess på tv.akuma.no som videresender ønsket kanal</li>
-					<li>Du får den hemmelige lenken til tv-kanalen tilbake</li>
-					<li>Denne lenken <em>må</em> åpnes i en mediespiller innen <em>30 sekunder</em></li>
-					<li>Mens du har kanalen åpen, kan ingen starte opp nye kanaler</li>
-					<li>Siden slutter å virke etter at du lukker spilleren</li>
-				</ol>
-			</li>
 			<li>Direktelink:
 				<ol>
 					<li><strong>Ikke</strong> gå inn på lenken, kopiér den</li>
@@ -21,7 +11,18 @@
 					<li>Dett skal være dett, prøv å åpne via proxy-siden dersom noe ved direktelinken ikke fungerte</li>
 				</ol>
 			</li>
+			<li>Proxyside:
+				<ol>
+					<li>Følg «Start en proxy»-lenken</li>
+					<li>Det startes opp en prosess på tv.akuma.no som videresender ønsket kanal</li>
+					<li>Du får den hemmelige lenken til tv-kanalen i en mengde forskjellige formater</li>
+					<li>En av lenkene <em>må</em> åpnes i en mediespiller innen <em>30 sekunder</em></li>
+					<li>Mens du har kanalen åpen, kan ingen starte opp nye kanaler</li>
+					<li>Lenkene på siden slutter å virke etter at du lukker spilleren</li>
+				</ol>
+			</li>
 		</ul>
+		<p>Du lurer også kanskje på hvem denne «one time password token» er? Dette beskytter sikkerheten til løsningen, og betyr i praksis at du alltid må laste listing-siden på nytt etter å ha sett på en kanal</p>
 	</div>
 	<div class="left">
 		<t:channels>

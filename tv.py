@@ -63,6 +63,8 @@ channels = Channels()
 def main(request):
     return Redirect('/listing/')
 
+supported_playlists = ['m3u', 'pls', 'xspf', 'asx']
+
 @route('/listing')
 def listing(request):
     template_data = {'channels': []}
@@ -70,8 +72,8 @@ def listing(request):
     for c in sorted(ch_copy.keys(), lambda x,y: cmp(ch_copy[x],ch_copy[y])):
         template_data['channels'].append({'dl':
             {'dt': ch_copy[c],
-             '#dd1': {'a': 'Start en proxy', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/url/?passwd=' + secret + '&ch=' + urllib2.quote(c)},
-             '#dd2': {'a': 'Direktelenke', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/redirect/?passwd=' + secret + '&ch=' + urllib2.quote(c)}}})
+             '#dd1': {'a': 'Start en proxy', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/url/?otp=' + secret + '&ch=' + urllib2.quote(c)},
+             '#dd2': {'a': 'Direktelenke', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/redirect/?otp=' + secret + '&ch=' + urllib2.quote(c)}}})
     return Response(renderer.render("templates/listing.xml", template_data))
 
 class VLCMonitor(threading.Thread):
@@ -121,9 +123,9 @@ def magic(request):
     port = 3337
     stream = request.GET.get('ch', '')
     global secret
-    passwd = request.GET.get('passwd', '')
-    if passwd != urllib2.unquote(secret):
-        return Response('Invalid password. Return to <a href="/listing">listing</a> and retry', status_code='402 Payment Required')
+    otp = request.GET.get('otp', '')
+    if otp != urllib2.unquote(secret):
+        return Response('Invalid one time password token. Return to <a href="/listing">listing</a> and retry', status_code='402 Payment Required')
     if not 'ch' in request.GET or len(request.GET['ch']) < 6:
         return Response('No channel defined or no protocol', status_code='500 Server Error')
     stream = request.GET['ch']
@@ -156,7 +158,10 @@ def url_page(request):
     if isinstance(response, Response):
         return response
     template_data['#url/href'] = response
-    template_data['#url'] = response
+    template_data['#url'] = 'Direct link to stream'
+    for p in supported_playlists:
+        template_data['#' + p + '/href'] = '/' + p + '/?otp=' + request.GET.get('otp') + '&ch=' + request.GET.get('ch')
+        template_data['#' + p] = p + ' playlist file'
     return Response(renderer.render("templates/url.xml", template_data))
 
 @route('/redirect')
@@ -164,7 +169,58 @@ def redirect_page(request):
     response = magic(request)
     if isinstance(response, Response):
         return response
+    time.sleep(1)
     return Redirect(response)
+
+
+@route('/pls')
+def pls_dl(request):
+    response = magic(request)
+    if isinstance(response, Response):
+        return response
+    time.sleep(1)
+    playlist = '''[playlist]
+File1=%s
+Title1=%s
+Length1=-1
+NumberOfEntries=1''' % (response, channels.get(response, response))
+    return Response(playlist, default_content_header=False,
+            headers=[('Content-type','audio/x-scpls'),
+                 ('Content-disposition', 'attachment;filename=tv.pls')])
+
+@route('/m3u')
+def m3u_dl(request):
+    response = magic(request)
+    if isinstance(response, Response):
+        return response
+    time.sleep(1)
+    return Response(response, default_content_header=False,
+            headers=[('Content-type','audio/x-mpegurl'),
+                 ('Content-disposition', 'attachment;filename=tv.m3u')])
+
+@route('/asx')
+def asx_dl(request):
+    response = magic(request)
+    if isinstance(response, Response):
+        return response
+    time.sleep(1)
+    template_data = {'#url/href': response, '#title': channels.get(response, response)}
+    return Response(TemplateRenderer().render("templates/asx.xml", template_data),
+            default_content_header=False,
+            headers=[('Content-type','video/x-ms-asf'),
+                 ('Content-disposition', 'attachment;filename=tv.asf')])
+
+@route('/xspf')
+def xspf_dl(request):
+    response = magic(request)
+    if isinstance(response, Response):
+        return response
+    time.sleep(1)
+    template_data = {'#url': response, '#title': channels.get(response, response)}
+    return Response(TemplateRenderer().render("templates/xspf.xml", template_data),
+            default_content_header=False,
+            headers=[('Content-type','application/xspf+xml'),
+                 ('Content-disposition', 'attachment;filename=tv.xspf')])
 
 if __name__ == '__main__':
     route('/media')(utils.fileserver)

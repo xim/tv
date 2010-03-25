@@ -19,6 +19,7 @@ h2 {
   border-left: 1px solid silver;
   width: 380px;
   float: right;
+  margin-top: -1.5em;
   padding-right: 1em;
   padding-left: .75em;
 }
