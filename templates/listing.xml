@@ -1,0 +1,9 @@
+<t:dummy xmlns:t="http://template.sesse.net/">
+	<t:channels>
+		<dl>
+			<dt />
+			<dd t:id='dd1'><a/>,</dd>
+			<dd t:id='dd2'><a/></dd>
+		</dl>
+	</t:channels>
+</t:dummy>

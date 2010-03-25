@@ -1,0 +1,5 @@
+<t:dummy xmlns:t="http://template.sesse.net/">
+	<p>Note: <stong>do not</stong> download as a file. Play using your favourite media player, e.g. VLC</p>
+	<a t:id="url" />
+	<h2 t:id="playing" style="color: red" />
+</t:dummy>

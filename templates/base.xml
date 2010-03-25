@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:t="http://template.sesse.net/" xml:lang="en">
+	<head>
+		<title>TV over haxx</title>
+		<link href="/media/style.css" rel="stylesheet" type="text/css" />
+	</head>
+
+	<body>
+		<h1>TV over haxx</h1>
+		<div id="contents">
+			<t:contents />
+		</div>
+	</body>
+</html>
