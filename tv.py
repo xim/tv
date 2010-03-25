@@ -119,7 +119,7 @@ def magic(request):
     global secret
     passwd = request.GET.get('passwd', '')
     if passwd != secret:
-        return Response('Invalid password. Return to listing and retry', status_code='500 Server Error')
+        return Response('Invalid password. Return to <a href="/listing">listing</a> and retry', status_code='402 Payment Required')
     if not 'ch' in request.GET or len(request.GET['ch']) < 6:
         return Response('No channel defined or no protocol', status_code='500 Server Error')
     stream = request.GET['ch']
