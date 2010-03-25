@@ -67,7 +67,7 @@ def listing(request):
         template_data['channels'].append({'dl':
             {'dt': ch_copy[c],
              '#dd1': {'a': 'Start en proxy', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/url/?passwd=' + secret + '&ch=' + urllib2.quote(c)},
-             '#dd2': {'a': 'Direktelink', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/redirect/?passwd=' + secret + '&ch=' + urllib2.quote(c)}}})
+             '#dd2': {'a': 'Direktelenke', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/redirect/?passwd=' + secret + '&ch=' + urllib2.quote(c)}}})
     return Response(renderer.render("templates/listing.xml", template_data))
 
 class VLCMonitor(threading.Thread):
