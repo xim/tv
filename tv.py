@@ -29,7 +29,7 @@ playing = None
 
 def random_secret(bits=16):
     with open('/dev/urandom') as f:
-        return f.read(bits).encode('base64').strip().rstrip('=')
+        return urllib2.quote(f.read(bits).encode('base64').strip().rstrip('='))
 global secret
 secret = random_secret()
 
@@ -122,7 +122,7 @@ def magic(request):
     stream = request.GET.get('ch', '')
     global secret
     passwd = request.GET.get('passwd', '')
-    if passwd != secret:
+    if passwd != urllib2.unquote(secret):
         return Response('Invalid password. Return to <a href="/listing">listing</a> and retry', status_code='402 Payment Required')
     if not 'ch' in request.GET or len(request.GET['ch']) < 6:
         return Response('No channel defined or no protocol', status_code='500 Server Error')
