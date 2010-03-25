@@ -124,7 +124,6 @@ def magic(request):
     global secret
     otp = request.GET.get('otp', '')
     if otp != urllib2.unquote(secret):
-        print otp, urllib2.unquote(secret)
         return Response('Invalid one time password token. Return to <a href="/listing">listing</a> and retry', status_code='402 Payment Required')
     if not 'ch' in request.GET or len(request.GET['ch']) < 6:
         return Response('No channel defined or no protocol', status_code='500 Server Error')
