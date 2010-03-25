@@ -121,10 +121,10 @@ class VLCMonitor(threading.Thread):
 
 def magic(request):
     port = 3337
-    stream = request.GET.get('ch', '')
     global secret
     otp = request.GET.get('otp', '')
     if otp != urllib2.unquote(secret):
+        print otp, urllib2.unquote(secret)
         return Response('Invalid one time password token. Return to <a href="/listing">listing</a> and retry', status_code='402 Payment Required')
     if not 'ch' in request.GET or len(request.GET['ch']) < 6:
         return Response('No channel defined or no protocol', status_code='500 Server Error')
@@ -160,7 +160,7 @@ def url_page(request):
     template_data['#url/href'] = response
     template_data['#url'] = 'Direct link to stream'
     for p in supported_playlists:
-        template_data['#' + p + '/href'] = '/' + p + '/?otp=' + request.GET.get('otp') + '&ch=' + request.GET.get('ch')
+        template_data['#' + p + '/href'] = '/' + p + '/?otp=' + urllib2.quote(request.GET['otp']) + '&ch=' + request.GET['ch']
         template_data['#' + p] = p + ' playlist file'
     return Response(renderer.render("templates/url.xml", template_data))
 
@@ -179,11 +179,12 @@ def pls_dl(request):
     if isinstance(response, Response):
         return response
     time.sleep(1)
+    stream = request.GET['ch']
     playlist = '''[playlist]
 File1=%s
 Title1=%s
 Length1=-1
-NumberOfEntries=1''' % (response, channels.get(response, response))
+NumberOfEntries=1''' % (response, channels.get(stream, stream))
     return Response(playlist, default_content_header=False,
             headers=[('Content-type','audio/x-scpls'),
                  ('Content-disposition', 'attachment;filename=tv.pls')])
@@ -204,7 +205,8 @@ def asx_dl(request):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    template_data = {'#url/href': response, '#title': channels.get(response, response)}
+    stream = request.GET['ch']
+    template_data = {'#url/href': response, '#title': channels.get(stream, stream)}
     return Response(TemplateRenderer().render("templates/asx.xml", template_data),
             default_content_header=False,
             headers=[('Content-type','video/x-ms-asf'),
@@ -216,7 +218,8 @@ def xspf_dl(request):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    template_data = {'#url': response, '#title': channels.get(response, response)}
+    stream = request.GET['ch']
+    template_data = {'#url': response, '#title': channels.get(stream, stream)}
     return Response(TemplateRenderer().render("templates/xspf.xml", template_data),
             default_content_header=False,
             headers=[('Content-type','application/xspf+xml'),
