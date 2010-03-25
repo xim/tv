@@ -1,31 +1,35 @@
 <t:dummy xmlns:t="http://template.sesse.net/">
-	<t:channels>
-		<dl>
-			<dt />
-			<dd t:id='dd1'><a/>,</dd>
-			<dd t:id='dd2'><a/></dd>
-		</dl>
-	</t:channels>
-	<h2>Hjelp!</h2>
-	<p>Jeg forstår ikke hva som skjer her! Hva er denne proxy-lenken og denne direktelenken?</p>
-	<p>Svaret er at de gjør (i all hovedsak) det samme. Forklaring av de to:</p>
-	<ul>
-		<li>Proxyside:
-			<ol>
-				<li>Gå inn på siden</li>
-				<li>Det startes opp en prosess på tv.akuma.no som videresender ønsket kanal</li>
-				<li>Du får den hemmelige lenken til tv-kanalen tilbake</li>
-				<li>Denne lenken <em>må</em> åpnes i en mediespiller innen <em>30 sekunder</em></li>
-				<li>Mens du har kanalen åpen, kan ingen starte opp nye kanaler</li>
-				<li>Siden slutter å virke etter at du lukker spilleren</li>
-			</ol>
-		</li>
-		<li>Direktelink:
-			<ol>
-				<li><strong>Ikke</strong> gå inn på lenken, kopiér den</li>
-				<li>Åpne lenken direkte i en mediespiller</li>
-				<li>Dett skal være dett, prøv å åpne via proxy-siden dersom noe ved direktelinken ikke fungerte</li>
-			</ol>
-		</li>
-	</ul>
+	<div class="right">
+		<h2>Hjelp!</h2>
+		<p>Jeg forstår ikke hva som skjer her! Hva er denne proxy-lenken og denne direktelenken?</p>
+		<p>Svaret er at de gjør (i all hovedsak) det samme. Forklaring av de to:</p>
+		<ul>
+			<li>Proxyside:
+				<ol>
+					<li>Gå inn på siden</li>
+					<li>Det startes opp en prosess på tv.akuma.no som videresender ønsket kanal</li>
+					<li>Du får den hemmelige lenken til tv-kanalen tilbake</li>
+					<li>Denne lenken <em>må</em> åpnes i en mediespiller innen <em>30 sekunder</em></li>
+					<li>Mens du har kanalen åpen, kan ingen starte opp nye kanaler</li>
+					<li>Siden slutter å virke etter at du lukker spilleren</li>
+				</ol>
+			</li>
+			<li>Direktelink:
+				<ol>
+					<li><strong>Ikke</strong> gå inn på lenken, kopiér den</li>
+					<li>Åpne lenken direkte i en mediespiller</li>
+					<li>Dett skal være dett, prøv å åpne via proxy-siden dersom noe ved direktelinken ikke fungerte</li>
+				</ol>
+			</li>
+		</ul>
+	</div>
+	<div class="left">
+		<t:channels>
+			<dl>
+				<dt />
+				<dd t:id='dd1'><a/>,</dd>
+				<dd t:id='dd2'><a/></dd>
+			</dl>
+		</t:channels>
+	</div>
 </t:dummy>

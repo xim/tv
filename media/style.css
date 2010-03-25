@@ -9,11 +9,18 @@ h1 {
   background-color: #105010;
 }
 h2 {
-  border-top: 1px solid gray;
-  margin-top: .5em;
-  padding-top: .5em;
-  max-width: 50%;
   font-size: xx-large;
+}
+.left {
+  padding-right: .75em;
+  margin-right: 0;
+}
+.right {
+  border-left: 1px solid silver;
+  width: 380px;
+  float: right;
+  padding-right: 1em;
+  padding-left: .75em;
 }
 html, body {
   width: 100%;
