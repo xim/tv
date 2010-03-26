@@ -63,8 +63,6 @@ channels = Channels()
 def main(request):
     return Redirect('/listing/')
 
-supported_playlists = ['m3u', 'pls', 'xspf', 'asx']
-
 @route('/listing')
 def listing(request):
     template_data = {'channels': []}
@@ -157,10 +155,8 @@ def url_page(request):
     if isinstance(response, Response):
         return response
     template_data['#url/href'] = response
-    template_data['#url'] = 'Direct link to stream'
-    for p in supported_playlists:
+    for p in ['player', 'm3u', 'pls', 'xspf', 'asx']:
         template_data['#' + p + '/href'] = '/' + p + '/?otp=' + urllib2.quote(request.GET['otp']) + '&ch=' + request.GET['ch']
-        template_data['#' + p] = p + ' playlist file'
     return Response(renderer.render("templates/url.xml", template_data))
 
 @route('/redirect')
@@ -171,6 +167,18 @@ def redirect_page(request):
     time.sleep(1)
     return Redirect(response)
 
+@route('/player')
+def object_player(request):
+    response = magic(request)
+    if isinstance(response, Response):
+        return response
+    time.sleep(1)
+    stream = request.GET['ch']
+    template_data = {'#player1/data': response, '#player2/value': response, '#title': channels.get(stream, stream)}
+    global playing
+    if playing != template_data['#title'] and playing != response:
+        template_data['#playing'] = 'Someone watching a different channel! Channel is locked to %s' % playing
+    return Response(renderer.render("templates/player.xml", template_data))
 
 @route('/pls')
 def pls_dl(request):

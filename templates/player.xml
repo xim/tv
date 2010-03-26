@@ -1,0 +1,8 @@
+<t:dummy xmlns:t="http://template.sesse.net/">
+	<h2 t:id="title" />
+	<object t:id="player1" type="video/mpeg" width="720" height="405">
+		<param t:id="player2" name="src" value="" />-->
+		<p>Her skulle nettleseren din vist en mediespiller. Noe gikk galt...</p>
+	</object>
+	<h2 t:id="playing" style="color:red" />
+</t:dummy>
