@@ -1,10 +1,16 @@
 <t:dummy xmlns:t="http://template.sesse.net/">
-	<p>Note: <stong>do not</stong> download as a file. Play using your favourite media player, e.g. VLC</p>
-	<a t:id="m3u">M3U playlist - the simplest there is, should always work. Originally mp3-centered though, so who knows</a><br />
-	<a t:id="xspf">XSPF - the «cool» young XML based playlist technology. Should work on most modern systems</a><br />
-	<a t:id="pls">PLS - Old, originally used for Podcasts. Should work well.</a><br />
-	<a t:id="asx">ASX - Microsoft's Advanced Stream Redirector - Bør (dessverre?) funke meget bra</a><br />
-	<a t:id="player">Spill av i nettleser (BETA)</a><br />
-	<a t:id="url">Direktelenke til strømmen - IKKE åpne denne i nettleser!</a>
-	<h2 t:id="playing" style="color: red" />
+	<p>Note: I recommend playing using using your favourite media player, e.g.
+		<a href="http://videolan.org/">VLC</a>,
+		<a href="http://mplayerhq.hu/">mplayer</a> or
+		<a href="http://mpc-hc.sf.net/">Media Player Classic</a>
+	</p>
+	<p>
+		<a t:id="m3u">M3U playlist</a> - the simplest there is, should always work. Originally mp3-centered though, so who knows<br />
+		<a t:id="xspf">XSPF playlist</a> - the «cool» young XML based playlist technology. Should work on most modern systems<br />
+		<a t:id="pls">PLS playlist</a> - Old, originally used for Podcasts. Should work well.<br />
+		<a t:id="asx">ASX file</a> - Microsoft's Advanced Stream Redirector - Works well (you didn't hear that from me!)<br />
+		<a t:id="player">Browser embedded player</a> - (BETA!)<br />
+		<a t:id="url">Direct link to stream</a> - Do <strong>not</strong> open in your browser!
+	</p>
+	<h2 t:id="playing" style="display: none">&#32;</h2>
 </t:dummy>

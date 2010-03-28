@@ -150,14 +150,16 @@ def magic(request):
 @route('/url')
 def url_page(request):
     template_data = {}
-    global playing
-    if playing is not None:
-        template_data['#playing'] = 'Someone already watching! Channel is locked to %s' % playing
 
     response = magic(request)
     if isinstance(response, Response):
         return response
     template_data['#url/href'] = response
+    global playing
+    stream = request.GET['ch']
+    if playing != channels.get(stream, stream):
+        template_data['#playing'] = 'Someone watching a different channel! Channel is locked to %s' % playing
+        template_data['#playing/style'] = 'color: red'
     for p in ['player', 'm3u', 'pls', 'xspf', 'asx']:
         template_data['#' + p + '/href'] = '/' + p + '/?otp=' + urllib2.quote(request.GET['otp']) + '&ch=' + request.GET['ch']
     return Response(renderer.render("templates/url.xml", template_data))
@@ -177,10 +179,11 @@ def object_player(request):
         return response
     time.sleep(1)
     stream = request.GET['ch']
-    template_data = {'#player1/data': response, '#player2/value': response, '#title': channels.get(stream, stream)}
+    template_data = {'#src/value': response, '#title': channels.get(stream, stream)}
     global playing
     if playing != template_data['#title'] and playing != response:
         template_data['#playing'] = 'Someone watching a different channel! Channel is locked to %s' % playing
+        template_data['#playing/style'] = 'color: red'
     return Response(renderer.render("templates/player.xml", template_data))
 
 @route('/pls')

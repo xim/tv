@@ -47,3 +47,6 @@ dl {
   padding: 0;
   margin: .2em 0;
 }
+#player {
+  background: white url('/media/player.png') no-repeat center center;
+}
