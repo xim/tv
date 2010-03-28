@@ -25,6 +25,7 @@
 		<p>Du lurer også kanskje på hvem denne «one time password token» er? Dette beskytter sikkerheten til løsningen, og betyr i praksis at du alltid må laste listing-siden på nytt etter å ha sett på en kanal</p>
 	</div>
 	<div class="left">
+		<h2 t:id="playing" style="display: none" >&#32;</h2>
 		<t:channels>
 			<dl>
 				<dt />

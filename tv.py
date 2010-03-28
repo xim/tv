@@ -72,6 +72,9 @@ def listing(request):
             {'dt': ch_copy[c],
              '#dd1': {'a': 'Start en proxy', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/url/?otp=' + secret + '&ch=' + urllib2.quote(c)},
              '#dd2': {'a': 'Direktelenke', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/redirect/?otp=' + secret + '&ch=' + urllib2.quote(c)}}})
+    if playing is not None:
+        template_data['#playing'] = 'Someone already watching! Channel is locked to %s' % playing
+        template_data['#playing/style'] = 'color: red'
     return Response(renderer.render("templates/listing.xml", template_data))
 
 class VLCMonitor(threading.Thread):
