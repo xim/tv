@@ -1,0 +1,13 @@
+<t:dummy xmlns:t="http://template.sesse.net/">
+	<h2 t:id="title" />
+
+	<p>
+		HTML 5 &ndash; fremtiden. (Dvs. dette fungerer i skrivende stund kanskje i safari på mac. Ellers ikke.)
+	</p>
+
+	<video t:id="src" controls="controls" autoplay="autoplay" src="">
+		Denne siden bruker HTML 5 sin &lt;video&gt;-tag. Det støtter ikke nettleseren din, ser det ut til.
+	</video>
+
+	<h2 t:id="playing" style="display: none">&#32;</h2>
+</t:dummy>

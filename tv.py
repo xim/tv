@@ -160,7 +160,7 @@ def url_page(request):
     if playing != channels.get(stream, stream):
         template_data['#playing'] = 'Someone watching a different channel! Channel is locked to %s' % playing
         template_data['#playing/style'] = 'color: red'
-    for p in ['player', 'm3u', 'pls', 'xspf', 'asx']:
+    for p in ['html5_player', 'object_player', 'm3u', 'pls', 'xspf', 'asx']:
         template_data['#' + p + '/href'] = '/' + p + '/?otp=' + urllib2.quote(request.GET['otp']) + '&ch=' + request.GET['ch']
     return Response(renderer.render("templates/url.xml", template_data))
 
@@ -172,19 +172,27 @@ def redirect_page(request):
     time.sleep(1)
     return Redirect(response)
 
-@route('/player')
+@route('/object_player')
 def object_player(request):
+    return player_page(request)
+
+@route('/html5_player')
+def html5_player(request):
+    return player_page(request, 'templates/html5_player.xml', '#src/src')
+
+def player_page(request, template='templates/object_player.xml', attr='#src/value'):
     response = magic(request)
     if isinstance(response, Response):
         return response
     time.sleep(1)
     stream = request.GET['ch']
-    template_data = {'#src/value': response, '#title': channels.get(stream, stream)}
+    template_data = {'#title': channels.get(stream, stream)}
+    template_data[attr] = response
     global playing
     if playing != template_data['#title'] and playing != response:
         template_data['#playing'] = 'Someone watching a different channel! Channel is locked to %s' % playing
         template_data['#playing/style'] = 'color: red'
-    return Response(renderer.render("templates/player.xml", template_data))
+    return Response(renderer.render(template, template_data))
 
 @route('/pls')
 def pls_dl(request):

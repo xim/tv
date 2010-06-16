@@ -9,7 +9,8 @@
 		<a t:id="xspf">XSPF playlist</a> - the «cool» young XML based playlist technology. Should work on most modern systems<br />
 		<a t:id="pls">PLS playlist</a> - Old, originally used for Podcasts. Should work well.<br />
 		<a t:id="asx">ASX file</a> - Microsoft's Advanced Stream Redirector - Works well (you didn't hear that from me!)<br />
-		<a t:id="player">Browser embedded player</a> - (BETA!)<br />
+		<a t:id="object_player">Browser embedded player</a> - (&lt;object&gt; based BETA!)<br />
+		<a t:id="html5_player">Browser embedded player</a> - (html5 &lt;video&gt; based BETA!)<br />
 		<a t:id="url">Direct link to stream</a> - Do <strong>not</strong> open in your browser!
 	</p>
 	<h2 t:id="playing" style="display: none">&#32;</h2>
