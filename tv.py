@@ -175,8 +175,8 @@ def magic(request):
     if otp != urllib2.unquote(secret):
         # 4 the lulz
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.3
-        return Response("""Invalid one time password token.
-                Return to <a href="/listing">listing</a> and retry""",
+        return Response(u"""Ugyldig engangspassord.
+                Gå tilbake til <a href="/listing">kanaloversikten</a>.""",
                 status_code='402 Payment Required')
     if not 'ch' in request.GET or len(request.GET['ch']) < 6:
         return Response('No channel defined or no protocol',
