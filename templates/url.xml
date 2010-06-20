@@ -1,17 +1,22 @@
 <t:dummy xmlns:t="http://template.sesse.net/">
-	<p>Note: I recommend playing using using your favourite media player, e.g.
+	<p>Dette er en liste over alle formater du kan få kanalen på.
+		De ender alle på samme strømmen, de forskjellige formatene finnes fordi
+		jeg ønsket å teste støtten på tvers av OS/programvare.
+	</p>
+	<p>Jeg anbefaler at du bruker redirigeringslenken på hovedsiden og
+		<strong>kopierer innholdet</strong> over i en god mediespiller, f.eks.
 		<a href="http://videolan.org/">VLC</a>,
-		<a href="http://mplayerhq.hu/">mplayer</a> or
+		<a href="http://mplayerhq.hu/">mplayer</a> eller
 		<a href="http://mpc-hc.sf.net/">Media Player Classic</a>
 	</p>
 	<p>
-		<a t:id="m3u">M3U playlist</a> - the simplest there is, should always work. Originally mp3-centered though, so who knows<br />
-		<a t:id="xspf">XSPF playlist</a> - the «cool» young XML based playlist technology. Should work on most modern systems<br />
-		<a t:id="pls">PLS playlist</a> - Old, originally used for Podcasts. Should work well.<br />
-		<a t:id="asx">ASX file</a> - Microsoft's Advanced Stream Redirector - Works well (you didn't hear that from me!)<br />
-		<a t:id="object_player">Browser embedded player</a> - (&lt;object&gt; based BETA!)<br />
-		<a t:id="html5_player">Browser embedded player</a> - (html5 &lt;video&gt; based BETA!)<br />
-		<a t:id="url">Direct link to stream</a> - Do <strong>not</strong> open in your browser!
+		<a t:id="m3u">M3U-spilleliste</a> - Det enkleste formatet som finnes, alle spillere skal forstå dette.<br />
+		<a t:id="xspf">XSPF playlist</a> - Et «kult, nytt» format, XML-basert.<br />
+		<a t:id="pls">PLS playlist</a> - Gammelt format opprinnelig laget for Podcasts. Støttes av det meste, om ikke annet.<br />
+		<a t:id="asx">ASX file</a> - Microsofts «Advanced Stream Redirector» - Bredt støttet, laget for ca. dette scenariet.<br />
+		<a t:id="object_player">Spill i nettleser</a> - (&lt;object&gt;-basert BETA!)<br />
+		<a t:id="html5_player">Spill i nettleser</a> - (html5 &lt;video&gt;-basert BETA!)<br />
+		<a t:id="url">Direktelenke til strømmen</a> - <strong>IKKE</strong> venstreklikk på denne lenken i nettleser!
 	</p>
-	<h2 t:id="playing" style="display: none">&#32;</h2>
+	<h2 t:id="playing" style="display: none">&#65279;</h2>
 </t:dummy>
