@@ -27,16 +27,22 @@ from pyroutes.template import TemplateRenderer
 renderer = TemplateRenderer("templates/base.xml")
 # Yes, we use a global variable to hold the name of the currently
 # playing channel.
-global playing
 playing = None
 
 def random_secret(bits=16):
+    """
+    Yes, we generate one time passwords from urandom that are reset when
+    the process dies or someone stops watching a channel
+    """
     with open('/dev/urandom') as f:
         return urllib2.quote(f.read(bits).encode('base64').strip().rstrip('='))
-# Yes, we generate one time passwords from urandom that are reset when
-# the process dies or someone stops watching a channel
-global secret
 secret = random_secret()
+
+# Re-use this for waring on active channel
+ACTIVE_WARNING = """
+Somebody is wathing the channel %s.
+Only this channel can be viewed.
+"""
 
 class ChannelListingError(Exception):
     """Exception
@@ -54,10 +60,12 @@ class Channels(dict):
     def __init__(self):
         super(Channels, self).__init__()
     def get_list(self):
+        """ Get list, creating it if it doesn't exist """
         if not self:
             self._populate()
         return self
     def _populate(self):
+        """ Actually generates the channel list """
         response = urllib2.urlopen(
                 'http://forskningsnett.uninett.no/tv/playlist.html')
         raw_pl = [x.strip() for x in response.readlines()[1:]]
@@ -87,13 +95,18 @@ def listing(request):
     """ Create a simple listing from the channels object """
     template_data = {'channels': []}
     ch_copy = dict(channels.get_list())
-    for c in sorted(ch_copy.keys(), lambda x,y: cmp(ch_copy[x],ch_copy[y])):
+    for ch in sorted(ch_copy.keys(), lambda x, y: cmp(ch_copy[x], ch_copy[y])):
         template_data['channels'].append({'dl':
-            {'dt': ch_copy[c],
-             '#dd1': {'a': 'Start en proxy', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/url/?otp=' + secret + '&ch=' + urllib2.quote(c)},
-             '#dd2': {'a': 'Direktelenke', 'a/href': 'http://' + request.ENV['HTTP_HOST'] + '/redirect/?otp=' + secret + '&ch=' + urllib2.quote(c)}}})
+            {'dt': ch_copy[ch],
+                '#dd1': {'a': 'Start en proxy',
+                    'a/href': 'http://' + request.ENV['HTTP_HOST'] +
+                    '/url/?otp=' + secret + '&ch=' + urllib2.quote(ch)
+                    },
+                '#dd2': {'a': 'Direktelenke',
+                    'a/href': 'http://' + request.ENV['HTTP_HOST'] +
+                    '/redirect/?otp=' + secret + '&ch=' + urllib2.quote(ch)}}})
     if playing is not None:
-        template_data['#playing'] = 'Someone already watching! Channel is locked to %s' % playing
+        template_data['#playing'] = ACTIVE_WARNING % playing
         template_data['#playing/style'] = 'color: red'
     return Response(renderer.render("templates/listing.xml", template_data))
 
@@ -110,6 +123,7 @@ class VLCMonitor(threading.Thread):
         self.port = port
 
     def run(self):
+        """ The code that is run while doing the actual monitoring """
         time.sleep(30)
         # Wait for process exit
         while self.monitor():
@@ -142,7 +156,8 @@ class VLCMonitor(threading.Thread):
                     port = int(line[1].split(':')[1], 16)
                     if state == '01' and port == self.port:
                         for fd in os.listdir('/proc/%d/fd' % self.vlc.pid):
-                            if os.stat('/proc/%d/fd/%s' % (self.vlc.pid,fd)).st_ino == int(inode):
+                            if os.stat('/proc/%d/fd/%s' % (self.vlc.pid, fd) \
+                                    ).st_ino == int(inode):
                                 # Return True on first active, relevant TCP
                                 return True
             except Exception, e:
@@ -156,17 +171,20 @@ def magic(request):
     Returns a HTTP URL with OTP for the running VLC process
     """
     port = 3337
-    global secret
     otp = request.GET.get('otp', '')
     if otp != urllib2.unquote(secret):
-        # Just 4 the lulz
+        # 4 the lulz
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.3
-        return Response('Invalid one time password token. Return to <a href="/listing">listing</a> and retry', status_code='402 Payment Required')
+        return Response("""Invalid one time password token.
+                Return to <a href="/listing">listing</a> and retry""",
+                status_code='402 Payment Required')
     if not 'ch' in request.GET or len(request.GET['ch']) < 6:
-        return Response('No channel defined or no protocol', status_code='500 Server Error')
+        return Response('No channel defined or no protocol',
+                status_code='500 Server Error')
     stream = request.GET['ch']
     protocol = stream[0:6]
     if protocol != 'rtp://' and protocol != 'udp://':
+        # TODO: Replace with an MPEG
         stream = '/home/xim/nobackup/alex_gaudino_-_destination_calabria.avi'
 
     global playing
@@ -182,7 +200,8 @@ def magic(request):
         playing = channels.get(stream, stream)
         VLCMonitor(vlc, port).start()
 
-    return 'http://%s:%d/%s' % (request.ENV['HTTP_HOST'].split(':')[0], port, secret)
+    return 'http://%s:%d/%s' % \
+            (request.ENV['HTTP_HOST'].split(':')[0], port, secret)
 
 @route('/url')
 def url_page(request):
@@ -193,13 +212,14 @@ def url_page(request):
     if isinstance(response, Response):
         return response
     template_data['#url/href'] = response
-    global playing
     stream = request.GET['ch']
     if playing != channels.get(stream, stream):
-        template_data['#playing'] = 'Someone watching a different channel! Channel is locked to %s' % playing
+        template_data['#playing'] = ACTIVE_WARNING % playing
         template_data['#playing/style'] = 'color: red'
     for p in ['html5_player', 'object_player', 'm3u', 'pls', 'xspf', 'asx']:
-        template_data['#' + p + '/href'] = '/' + p + '/?otp=' + urllib2.quote(request.GET['otp']) + '&ch=' + request.GET['ch']
+        template_data['#' + p + '/href'] = \
+                '/' + p + '/?otp=' + urllib2.quote(request.GET['otp']) + \
+                '&ch=' + request.GET['ch']
     return Response(renderer.render("templates/url.xml", template_data))
 
 @route('/redirect')
@@ -214,14 +234,14 @@ def redirect_page(request):
 @route('/object_player')
 def object_player(request):
     """ HTML <object> player """
-    return player_page(request)
+    return player_page(request, 'templates/object_player.xml', '#src/value')
 
 @route('/html5_player')
 def html5_player(request):
     """ HTML5 <video> player """
     return player_page(request, 'templates/html5_player.xml', '#src/src')
 
-def player_page(request, template='templates/object_player.xml', attr='#src/value'):
+def player_page(request, template, attr):
     """ Generic stuff for making an embedded player """
     response = magic(request)
     if isinstance(response, Response):
@@ -230,9 +250,8 @@ def player_page(request, template='templates/object_player.xml', attr='#src/valu
     stream = request.GET['ch']
     template_data = {'#title': channels.get(stream, stream)}
     template_data[attr] = response
-    global playing
     if playing != template_data['#title'] and playing != response:
-        template_data['#playing'] = 'Someone watching a different channel! Channel is locked to %s' % playing
+        template_data['#playing'] = ACTIVE_WARNING % playing
         template_data['#playing/style'] = 'color: red'
     return Response(renderer.render(template, template_data))
 
@@ -272,8 +291,12 @@ def asx_dl(request):
         return response
     time.sleep(1)
     stream = request.GET['ch']
-    template_data = {'#url/href': response, '#title': channels.get(stream, stream)}
-    return Response(TemplateRenderer().render("templates/asx.xml", template_data),
+    template_data = {
+            '#url/href': response,
+            '#title': channels.get(stream, stream)
+            }
+    return Response(
+            TemplateRenderer().render("templates/asx.xml", template_data),
             default_content_header=False,
             headers=[('Content-type','video/x-ms-asf'),
                  ('Content-disposition', 'attachment;filename=tv.asf')])
@@ -287,7 +310,8 @@ def xspf_dl(request):
     time.sleep(1)
     stream = request.GET['ch']
     template_data = {'#url': response, '#title': channels.get(stream, stream)}
-    return Response(TemplateRenderer().render("templates/xspf.xml", template_data),
+    return Response(
+            TemplateRenderer().render("templates/xspf.xml", template_data),
             default_content_header=False,
             headers=[('Content-type','application/xspf+xml'),
                  ('Content-disposition', 'attachment;filename=tv.xspf')])
