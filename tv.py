@@ -39,9 +39,9 @@ def random_secret(bits=16):
 secret = random_secret()
 
 # Re-use this for waring on active channel
-ACTIVE_WARNING = """
-Somebody is wathing the channel %s.
-Only this channel can be viewed.
+ACTIVE_WARNING = u"""
+Noen ser på kanalen %s.
+Det er kun mulig å se denne kanalen for øyeblikket.
 """
 
 class ChannelListingError(Exception):
