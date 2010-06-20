@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+# encoding: utf-8
+
+"""
+TV over python? - Oooh, the horror =)
+"""
 
 from __future__ import with_statement
 
@@ -18,25 +23,34 @@ from pyroutes import route, application, utils
 from pyroutes.http.response import Response, Redirect
 from pyroutes.template import TemplateRenderer
 
-"""
-TV over python elns
-"""
-
 
 renderer = TemplateRenderer("templates/base.xml")
+# Yes, we use a global variable to hold the name of the currently
+# playing channel.
 global playing
 playing = None
 
 def random_secret(bits=16):
     with open('/dev/urandom') as f:
         return urllib2.quote(f.read(bits).encode('base64').strip().rstrip('='))
+# Yes, we generate one time passwords from urandom that are reset when
+# the process dies or someone stops watching a channel
 global secret
 secret = random_secret()
 
 class ChannelListingError(Exception):
+    """Exception
+
+    for catching errors when playlist.html is not the expected m3u form
+    """
     pass
 
 class Channels(dict):
+    """Channels
+
+    Gets http://forskningsnett.uninett.no/tv/playlist.html
+    Makes it into a dict
+    """
     def __init__(self):
         super(Channels, self).__init__()
     def get_list(self):
@@ -57,14 +71,20 @@ class Channels(dict):
             except IndexError:
                 raise ChannelListingError('Channel with missing discription?')
 
+# Yes, channels are re-fetched every time the file is loaded.
 channels = Channels()
 
 @route('/')
 def main(request):
+    """Keep all pages different sub-URLs, not on /
+
+    in case we want to make a different front page
+    """
     return Redirect('/listing/')
 
 @route('/listing')
 def listing(request):
+    """ Create a simple listing from the channels object """
     template_data = {'channels': []}
     ch_copy = dict(channels.get_list())
     for c in sorted(ch_copy.keys(), lambda x,y: cmp(ch_copy[x],ch_copy[y])):
@@ -78,6 +98,11 @@ def listing(request):
     return Response(renderer.render("templates/listing.xml", template_data))
 
 class VLCMonitor(threading.Thread):
+    """Here be dragons :S
+
+    Holds threads that watch the VLC processes, and kill them when noone
+    is watching -- using /proc/<pid>/net/tcp
+    """
 
     def __init__(self, vlc, port):
         super(VLCMonitor, self).__init__()
@@ -86,22 +111,27 @@ class VLCMonitor(threading.Thread):
 
     def run(self):
         time.sleep(30)
+        # Wait for process exit
         while self.monitor():
             time.sleep(5)
 
+        # Reset OTP
         global secret, playing
         secret = random_secret()
         playing = None
 
         sys.stderr.write('killing vlc...')
+        # ^C the process
         os.kill(self.vlc.pid, 2)
+        # Wait a moment
         time.sleep(3)
-        poll = self.vlc.poll()
         if self.vlc.poll() is None:
-            sys.stderr.write('vlc not responding (%r). KILL!' % poll)
+            sys.stderr.write('vlc not responding (%r). KILL!' % self.vlc.pid)
+            # KILL DASH NINE if it hasn't exited
             os.kill(self.vlc.pid, 9)
 
     def monitor(self):
+        """ Try to find incoming TCP connections for this VLC """
         with open('/proc/%d/net/tcp' % self.vlc.pid, 'r') as netstat:
             try:
                 netstat.readline()
@@ -113,7 +143,7 @@ class VLCMonitor(threading.Thread):
                     if state == '01' and port == self.port:
                         for fd in os.listdir('/proc/%d/fd' % self.vlc.pid):
                             if os.stat('/proc/%d/fd/%s' % (self.vlc.pid,fd)).st_ino == int(inode):
-                                #print pid, inode, port, state, line
+                                # Return True on first active, relevant TCP
                                 return True
             except Exception, e:
                 sys.stderr.write(e.__class__.__name__ + ': ' + e)
@@ -121,10 +151,16 @@ class VLCMonitor(threading.Thread):
         return False
 
 def magic(request):
+    """Common VLC starting magic
+
+    Returns a HTTP URL with OTP for the running VLC process
+    """
     port = 3337
     global secret
     otp = request.GET.get('otp', '')
     if otp != urllib2.unquote(secret):
+        # Just 4 the lulz
+        # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.3
         return Response('Invalid one time password token. Return to <a href="/listing">listing</a> and retry', status_code='402 Payment Required')
     if not 'ch' in request.GET or len(request.GET['ch']) < 6:
         return Response('No channel defined or no protocol', status_code='500 Server Error')
@@ -135,6 +171,7 @@ def magic(request):
 
     global playing
     if playing is None:
+        # vlc for forwarding streams is easy! ♥
         vlc = subprocess.Popen(
             ['/usr/bin/vlc',
             '-Idummy',
@@ -149,6 +186,7 @@ def magic(request):
 
 @route('/url')
 def url_page(request):
+    """ List all available formats for a channel """
     template_data = {}
 
     response = magic(request)
@@ -166,6 +204,7 @@ def url_page(request):
 
 @route('/redirect')
 def redirect_page(request):
+    """ Sleep a second and redirect to the stream. My fav. """
     response = magic(request)
     if isinstance(response, Response):
         return response
@@ -174,13 +213,16 @@ def redirect_page(request):
 
 @route('/object_player')
 def object_player(request):
+    """ HTML <object> player """
     return player_page(request)
 
 @route('/html5_player')
 def html5_player(request):
+    """ HTML5 <video> player """
     return player_page(request, 'templates/html5_player.xml', '#src/src')
 
 def player_page(request, template='templates/object_player.xml', attr='#src/value'):
+    """ Generic stuff for making an embedded player """
     response = magic(request)
     if isinstance(response, Response):
         return response
@@ -196,6 +238,7 @@ def player_page(request, template='templates/object_player.xml', attr='#src/valu
 
 @route('/pls')
 def pls_dl(request):
+    """ Makes a .pls file """
     response = magic(request)
     if isinstance(response, Response):
         return response
@@ -212,6 +255,7 @@ NumberOfEntries=1''' % (response, channels.get(stream, stream))
 
 @route('/m3u')
 def m3u_dl(request):
+    """ Makes an m3u file """
     response = magic(request)
     if isinstance(response, Response):
         return response
@@ -222,6 +266,7 @@ def m3u_dl(request):
 
 @route('/asx')
 def asx_dl(request):
+    """ Microsoft asx, XML based format """
     response = magic(request)
     if isinstance(response, Response):
         return response
@@ -235,6 +280,7 @@ def asx_dl(request):
 
 @route('/xspf')
 def xspf_dl(request):
+    """ XSPF, an XML based playlist format """
     response = magic(request)
     if isinstance(response, Response):
         return response
@@ -247,5 +293,7 @@ def xspf_dl(request):
                  ('Content-disposition', 'attachment;filename=tv.xspf')])
 
 if __name__ == '__main__':
+    # For when we are running tv.py from the shell
+    # I've seen the media server bug in chromium. Should be debugged...
     route('/media')(utils.fileserver)
     utils.devserver(application)
