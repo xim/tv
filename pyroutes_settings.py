@@ -1,5 +1,5 @@
 # DEBUG shows more debug info for HTTP 500
-DEBUG = True
+DEBUG = False
 
 # Path to media files. Used by development media server in contrib.
 #DEV_MEDIA_BASE = '.'
