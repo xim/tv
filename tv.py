@@ -13,6 +13,7 @@ import sys
 import threading
 import time
 import urllib2
+import uuid
 
 if 'APACHE_PID_FILE' in os.environ:
     # Hacks run if running in apache
@@ -29,13 +30,12 @@ renderer = TemplateRenderer("templates/base.xml")
 # playing channel.
 playing = None
 
-def random_secret(bits=16):
+def random_secret():
     """
-    Yes, we generate one time passwords from urandom that are reset when
-    the process dies or someone stops watching a channel
+    Yes, we generate one time passwords that are reset when the process
+    dies or someone stops watching a channel
     """
-    with open('/dev/urandom') as f:
-        return urllib2.quote(f.read(bits).encode('base64').strip().rstrip('='))
+    return urllib2.quote(uuid.uuid4().hex.encode('base64').strip().rstrip('='))
 secret = random_secret()
 
 # Re-use this for waring on active channel
