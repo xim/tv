@@ -175,11 +175,11 @@ def magic(request):
     if otp != urllib2.unquote(secret):
         # 4 the lulz
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.3
-        return Response(u"""Ugyldig engangspassord.
-                Gå tilbake til <a href="/listing">kanaloversikten</a>.""",
+        return Response("""Ugyldig engangspassord.
+                G\xc3\xa5 tilbake til <a href="/listing">kanaloversikten</a>.""",
                 status_code='402 Payment Required')
     if not 'ch' in request.GET or len(request.GET['ch']) < 6:
-        return Response('No channel defined or no protocol',
+        return Response('Ugyldig eller manglende adresse til kanal',
                 status_code='500 Server Error')
     stream = request.GET['ch']
     protocol = stream[0:6]
