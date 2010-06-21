@@ -35,7 +35,7 @@ def random_secret():
     Yes, we generate one time passwords that are reset when the process
     dies or someone stops watching a channel
     """
-    return urllib2.quote(uuid.uuid4().hex.encode('base64').strip().rstrip('='))
+    return uuid.uuid4().hex
 secret = random_secret()
 
 # Re-use this for waring on active channel
@@ -172,7 +172,7 @@ def magic(request):
     """
     port = 3337
     otp = request.GET.get('otp', '')
-    if otp != urllib2.unquote(secret):
+    if otp != secret:
         # 4 the lulz
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.3
         return Response("""Ugyldig engangspassord.
@@ -206,12 +206,11 @@ def magic(request):
 @route('/url')
 def url_page(request):
     """ List all available formats for a channel """
-    template_data = {}
-
     response = magic(request)
     if isinstance(response, Response):
         return response
-    template_data['#url/href'] = response
+
+    template_data = {'#url/href': response}
     stream = request.GET['ch']
     if playing != channels.get(stream, stream):
         template_data['#playing'] = ACTIVE_WARNING % playing
