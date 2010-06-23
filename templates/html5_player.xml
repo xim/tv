@@ -2,7 +2,7 @@
 	<h2 t:id="title" />
 
 	<p>
-		HTML 5 &ndash; fremtiden. (Dvs. dette fungerer i skrivende stund kanskje i safari på mac. Ellers ikke.)
+		HTML 5 &#8211; fremtiden. (Dvs. dette fungerer i skrivende stund kanskje i safari på mac. Ellers ikke.)
 	</p>
 
 	<video t:id="src" controls="controls" autoplay="autoplay" src="">
