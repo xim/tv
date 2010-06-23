@@ -1,10 +1,9 @@
 <t:dummy xmlns:t="http://template.sesse.net/">
 	<h2 t:id="title" />
 
-	<p>If no video appears, or the browser tells you to install the Quicktime
-		plugin, please install a suitable plugin (and use a decent browser). (E.g.
-		<a href="http://wiki.videolan.org/Documentation:Play_HowTo/Advanced_Use_of_VLC#The_Mozilla_plugin">
-			The VLC plugin in Firefox</a>.)
+	<p>Hvis ingen video dukker opp, eller du blir bedt om å installere quicktime,
+		vil jeg uansett anbefale deg å bruke en lokal avspiller. Les kommentarene
+		på proxysiden.
 	</p>
 
 	<object id="player" type="video/mpeg" width="720" height="405">
