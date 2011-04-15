@@ -20,7 +20,7 @@ if 'APACHE_PID_FILE' in os.environ:
     sys.path.insert(0, '/home/xim/dev/tv/')
     os.chdir('/home/xim/dev/tv/')
 
-from pyroutes import route, application, utils
+from pyroutes import route, application, utils, settings
 from pyroutes.http.response import Response, Redirect
 from pyroutes.template import TemplateRenderer
 
@@ -100,10 +100,12 @@ def listing(request):
             {'dt': ch_copy[ch],
                 '#dd1': {'a': 'Start en proxy',
                     'a/href': 'http://' + request.ENV['HTTP_HOST'] +
+                    settings.SITE_ROOT +
                     '/url/?otp=' + secret + '&ch=' + urllib2.quote(ch)
                     },
                 '#dd2': {'a': 'Direktelenke',
                     'a/href': 'http://' + request.ENV['HTTP_HOST'] +
+                    settings.SITE_ROOT +
                     '/redirect/?otp=' + secret + '&ch=' + urllib2.quote(ch)}}})
     if playing is not None:
         template_data['#playing'] = ACTIVE_WARNING % playing
@@ -176,7 +178,7 @@ def magic(request):
         # 4 the lulz
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.3
         return Response("""Ugyldig engangspassord.
-                G\xc3\xa5 tilbake til <a href="/listing">kanaloversikten</a>.""",
+                G\xc3\xa5 tilbake til <a href="../listing">kanaloversikten</a>.""",
                 status_code='402 Payment Required')
     if not 'ch' in request.GET or len(request.GET['ch']) < 6:
         return Response('Ugyldig eller manglende adresse til kanal',
@@ -217,7 +219,7 @@ def url_page(request):
         template_data['#playing/style'] = 'color: red'
     for p in ['html5_player', 'object_player', 'm3u', 'pls', 'xspf', 'asx']:
         template_data['#' + p + '/href'] = \
-                '/' + p + '/?otp=' + urllib2.quote(request.GET['otp']) + \
+                '../' + p + '/?otp=' + urllib2.quote(request.GET['otp']) + \
                 '&ch=' + request.GET['ch']
     return Response(renderer.render("templates/url.xml", template_data))
 
