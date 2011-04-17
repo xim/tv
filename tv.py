@@ -99,14 +99,15 @@ def listing(request):
         template_data['channels'].append({'dl':
             {'dt': ch_copy[ch],
                 '#dd1': {'a': 'Start en proxy',
-                    'a/href': 'http://' + request.ENV['HTTP_HOST'] +
-                    settings.SITE_ROOT +
-                    '/url/?otp=' + secret + '&ch=' + urllib2.quote(ch)
-                    },
+                    'a/href': 'http://' + request.ENV['HTTP_HOST']
+                    + settings.SITE_ROOT + '/url/' + secret + '?ch='
+                    + urllib2.quote(ch)},
                 '#dd2': {'a': 'Direktelenke',
-                    'a/href': 'http://' + request.ENV['HTTP_HOST'] +
-                    settings.SITE_ROOT +
-                    '/redirect/?otp=' + secret + '&ch=' + urllib2.quote(ch)}}})
+                    'a/href': 'http://' + request.ENV['HTTP_HOST']
+                    + settings.SITE_ROOT + '/redirect/' + secret + '?ch='
+                    + urllib2.quote(ch)}
+            }
+        })
     if playing is not None:
         template_data['#playing'] = ACTIVE_WARNING % playing
         template_data['#playing/style'] = 'color: red'
@@ -167,13 +168,12 @@ class VLCMonitor(threading.Thread):
                 return False
         return False
 
-def magic(request):
+def magic(request, otp=''):
     """Common VLC starting magic
 
     Returns a HTTP URL with OTP for the running VLC process
     """
     port = 3337
-    otp = request.GET.get('otp', '')
     if otp != secret:
         # 4 the lulz
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.3
@@ -206,9 +206,9 @@ def magic(request):
             (request.ENV['HTTP_HOST'].split(':')[0], port, secret)
 
 @route('/url')
-def url_page(request):
+def url_page(request, otp=''):
     """ List all available formats for a channel """
-    response = magic(request)
+    response = magic(request, otp)
     if isinstance(response, Response):
         return response
 
@@ -218,33 +218,32 @@ def url_page(request):
         template_data['#playing'] = ACTIVE_WARNING % playing
         template_data['#playing/style'] = 'color: red'
     for p in ['html5_player', 'object_player', 'm3u', 'pls', 'xspf', 'asx']:
-        template_data['#' + p + '/href'] = \
-                '../' + p + '/?otp=' + urllib2.quote(request.GET['otp']) + \
-                '&ch=' + request.GET['ch']
+        template_data['#' + p + '/href'] = '../' + p + '/' \
+                + urllib2.quote(otp) + '?ch='  + request.GET['ch']
     return Response(renderer.render("templates/url.xml", template_data))
 
 @route('/redirect')
-def redirect_page(request):
+def redirect_page(request, otp=''):
     """ Sleep a second and redirect to the stream. My fav. """
-    response = magic(request)
+    response = magic(request, otp)
     if isinstance(response, Response):
         return response
     time.sleep(1)
     return Redirect(response)
 
 @route('/object_player')
-def object_player(request):
+def object_player(request, otp=''):
     """ HTML <object> player """
-    return player_page(request, 'templates/object_player.xml', '#src/value')
+    return player_page(request, otp, 'templates/object_player.xml', '#src/value')
 
 @route('/html5_player')
-def html5_player(request):
+def html5_player(request, otp=''):
     """ HTML5 <video> player """
-    return player_page(request, 'templates/html5_player.xml', '#src/src')
+    return player_page(request, otp, 'templates/html5_player.xml', '#src/src')
 
-def player_page(request, template, attr):
+def player_page(request, otp, template, attr):
     """ Generic stuff for making an embedded player """
-    response = magic(request)
+    response = magic(request, otp)
     if isinstance(response, Response):
         return response
     time.sleep(1)
@@ -257,9 +256,9 @@ def player_page(request, template, attr):
     return Response(renderer.render(template, template_data))
 
 @route('/pls')
-def pls_dl(request):
+def pls_dl(request, otp=''):
     """ Makes a .pls file """
-    response = magic(request)
+    response = magic(request, otp)
     if isinstance(response, Response):
         return response
     time.sleep(1)
@@ -274,9 +273,9 @@ NumberOfEntries=1''' % (response, channels.get(stream, stream))
                  ('Content-disposition', 'attachment;filename=tv.pls')])
 
 @route('/m3u')
-def m3u_dl(request):
+def m3u_dl(request, otp=''):
     """ Makes an m3u file """
-    response = magic(request)
+    response = magic(request, otp)
     if isinstance(response, Response):
         return response
     time.sleep(1)
@@ -285,9 +284,9 @@ def m3u_dl(request):
                  ('Content-disposition', 'attachment;filename=tv.m3u')])
 
 @route('/asx')
-def asx_dl(request):
+def asx_dl(request, otp=''):
     """ Microsoft asx, XML based format """
-    response = magic(request)
+    response = magic(request, otp)
     if isinstance(response, Response):
         return response
     time.sleep(1)
@@ -303,9 +302,9 @@ def asx_dl(request):
                  ('Content-disposition', 'attachment;filename=tv.asf')])
 
 @route('/xspf')
-def xspf_dl(request):
+def xspf_dl(request, otp=''):
     """ XSPF, an XML based playlist format """
-    response = magic(request)
+    response = magic(request, otp)
     if isinstance(response, Response):
         return response
     time.sleep(1)
