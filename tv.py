@@ -318,6 +318,19 @@ def xspf_dl(request, otp=''):
 
 if __name__ == '__main__':
     # For when we are running tv.py from the shell
-    # I've seen the media server bug in chromium. Should be debugged...
+
+    port = 8001
+    address = '0.0.0.0'
+    if sys.argv[1:]:
+        try:
+            address, port = sys.argv[1].rsplit(':', 1)
+            port = int(port)
+        except ValueError:
+            sys.stderr.write(
+'''If you want to supply a listen address, it must be on the format IP:port
+Examples:
+  ./tv.py :80     # Listen on all IPv4 addresses, on the HTTP port
+  ./tv.py 127.0.0.1:8000 # Run on localhost, good for development
+''')
     route('/media')(utils.fileserver)
-    utils.devserver(application)
+    utils.devserver(application, address=address, port=port)
