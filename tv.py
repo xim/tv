@@ -82,7 +82,7 @@ channels = Channels()
 def main(request):
     """Keep all pages different sub-URLs, not on /
 
-    in case we want to make a different front page
+    in case we want to make a different front page or whatever
     """
     return Redirect('/listing/')
 
@@ -112,7 +112,7 @@ def listing(request):
     return Response(renderer.render("templates/listing.xml", template_data))
 
 class VLCMonitor(threading.Thread):
-    """Here be dragons :S
+    """Here be dragons :)
 
     Holds threads that watch the VLC processes, and kill them when noone
     is watching -- using /proc/<pid>/net/tcp
@@ -192,7 +192,7 @@ def magic(request, key=''):
             '-Idummy',
             channels[channel],
             '--sout',
-            '#std{access=http,mux=ts,dst=0.0.0.0:%d/%s}' % (port,secret)]
+            '#std{access=http,mux=ts,dst=0.0.0.0:%d/%s}' % (port, secret)]
             )
         playing[channel] = port
         VLCMonitor(vlc, channel).start()
@@ -325,7 +325,7 @@ if __name__ == '__main__':
             sys.stderr.write(
 '''If you want to supply a listen address, it must be on the format IP:port
 Examples:
-  ./tv.py :80     # Listen on all IPv4 addresses, on the HTTP port
+  ./tv.py :80            # Listen on all IPv4 addresses, on the HTTP port
   ./tv.py 127.0.0.1:8000 # Run on localhost, good for development
 ''')
     route('/media')(utils.fileserver)
