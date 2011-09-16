@@ -165,13 +165,13 @@ class VLCMonitor(threading.Thread):
                 return False
         return False
 
-def magic(request, otp=''):
+def magic(request, key=''):
     """Common VLC starting magic
 
     Returns a HTTP URL with port and key for a running VLC process
     """
     port = 3337
-    if otp != secret:
+    if key != secret:
         # 4 the lulz
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.3
         return Response("""Ugyldig nøkkel.
@@ -203,9 +203,9 @@ def magic(request, otp=''):
             (request.ENV['HTTP_HOST'].split(':')[0], port, secret)
 
 @route('/url')
-def url_page(request, otp=''):
+def url_page(request, key=''):
     """ List all available formats for a channel """
-    response = magic(request, otp)
+    response = magic(request, key)
     if isinstance(response, Response):
         return response
 
@@ -213,15 +213,15 @@ def url_page(request, otp=''):
     stream = request.GET['ch']
     for p in ['html5_player', 'object_player', 'm3u', 'pls', 'xspf', 'asx']:
         template_data['#' + p + '/href'] = '../' + p + '/' \
-                + urllib2.quote(otp) + '?ch='  + request.GET['ch']
+                + urllib2.quote(key) + '?ch=' + request.GET['ch']
     return Response(renderer.render("templates/url.xml", template_data))
 
 @route('/redirect')
-def redirect_page(request, otp=''):
+def redirect_page(request, key=''):
     """ Sleep a second and redirect to the stream. My fav. """
     if request.ENV.get('REQUEST_METHOD', '') == 'HEAD':
         return Redirect('/head')
-    response = magic(request, otp)
+    response = magic(request, key)
     if isinstance(response, Response):
         return response
     time.sleep(1)
@@ -232,18 +232,19 @@ def head_redirect_target(request):
     return Response('', [('Content-type', 'application/octet-stream')])
 
 @route('/object_player')
-def object_player(request, otp=''):
+def object_player(request, key=''):
     """ HTML <object> player """
-    return player_page(request, otp, 'templates/object_player.xml', '#src/value')
+    return player_page(request, key, 'templates/object_player.xml',
+            '#src/value')
 
 @route('/html5_player')
-def html5_player(request, otp=''):
+def html5_player(request, key=''):
     """ HTML5 <video> player """
-    return player_page(request, otp, 'templates/html5_player.xml', '#src/src')
+    return player_page(request, key, 'templates/html5_player.xml', '#src/src')
 
-def player_page(request, otp, template, attr):
+def player_page(request, key, template, attr):
     """ Generic stuff for making an embedded player """
-    response = magic(request, otp)
+    response = magic(request, key)
     if isinstance(response, Response):
         return response
     time.sleep(1)
@@ -253,9 +254,9 @@ def player_page(request, otp, template, attr):
     return Response(renderer.render(template, template_data))
 
 @route('/pls')
-def pls_dl(request, otp=''):
+def pls_dl(request, key=''):
     """ Makes a .pls file """
-    response = magic(request, otp)
+    response = magic(request, key)
     if isinstance(response, Response):
         return response
     time.sleep(1)
@@ -270,20 +271,20 @@ NumberOfEntries=1''' % (response, channel)
                  ('Content-disposition', 'attachment;filename=tv.pls')])
 
 @route('/m3u')
-def m3u_dl(request, otp=''):
+def m3u_dl(request, key=''):
     """ Makes an m3u file """
-    response = magic(request, otp)
+    response = magic(request, key)
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    return Response(response, default_content_header=False,
+    return Response(response,
             headers=[('Content-type','audio/x-mpegurl'),
                  ('Content-disposition', 'attachment;filename=tv.m3u')])
 
 @route('/asx')
-def asx_dl(request, otp=''):
+def asx_dl(request, key=''):
     """ Microsoft asx, XML based format """
-    response = magic(request, otp)
+    response = magic(request, key)
     if isinstance(response, Response):
         return response
     time.sleep(1)
@@ -299,9 +300,9 @@ def asx_dl(request, otp=''):
                  ('Content-disposition', 'attachment;filename=tv.asf')])
 
 @route('/xspf')
-def xspf_dl(request, otp=''):
+def xspf_dl(request, key=''):
     """ XSPF, an XML based playlist format """
-    response = magic(request, otp)
+    response = magic(request, key)
     if isinstance(response, Response):
         return response
     time.sleep(1)
