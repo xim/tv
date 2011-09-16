@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <!-- Plugin settings strings -->
+    <string id="30000">Brukernavn</string>
+    <string id="30005">Passord</string>
+    <string id="30010">URL til tjener</string>
+</strings>

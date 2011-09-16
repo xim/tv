@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <!-- Plugin settings strings -->
+    <string id="30000">Username</string>
+    <string id="30005">Password</string>
+    <string id="30010">Server URL</string>
+</strings>

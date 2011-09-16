@@ -1,0 +1,3 @@
+This is a small plugin for XBMC that integrates with TV.py.
+
+Just place the entire folder (plugin.video.tv) in your .xbmc/addons folder.
