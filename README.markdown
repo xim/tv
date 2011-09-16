@@ -11,13 +11,13 @@ This project is a hack, made so I can watch norwegian TV channels from abroad =)
 
 # Deployment
 
-A deployment web server is recommended, but can also run standalone.
+A deployment web server is recommended (Apache2+WSGI tested), but can also run standalone.
 
 ## Running as standalone
 
  * Just run (as root) ./tv.py [listen address]:80
 
-## Deployment in apache
+## Deployment in Apache2+WSGI
 
     <VirtualHost *:443>
     	# If you want SSL – example from my free StartSSL cert
