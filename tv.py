@@ -295,7 +295,6 @@ def asx_dl(request, key=''):
             }
     return Response(
             TemplateRenderer().render("templates/asx.xml", template_data),
-            default_content_header=False,
             headers=[('Content-type','video/x-ms-asf'),
                  ('Content-disposition', 'attachment;filename=tv.asf')])
 
@@ -310,7 +309,6 @@ def xspf_dl(request, key=''):
     template_data = {'#url': response, '#title': channel}
     return Response(
             TemplateRenderer().render("templates/xspf.xml", template_data),
-            default_content_header=False,
             headers=[('Content-type','application/xspf+xml'),
                  ('Content-disposition', 'attachment;filename=tv.xspf')])
 
