@@ -8,6 +8,4 @@
 	<video t:id="src" controls="controls" autoplay="autoplay" src="">
 		Denne siden bruker HTML 5 sin &lt;video&gt;-tag. Det støtter ikke nettleseren din, ser det ut til.
 	</video>
-
-	<h2 t:id="playing" style="display: none">&#32;</h2>
 </t:dummy>

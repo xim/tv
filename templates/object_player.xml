@@ -12,6 +12,4 @@
 		<param name="controller" value="true" />
 		<param t:id="src" name="src" value="" />
 	</object>
-
-	<h2 t:id="playing" style="display: none">&#32;</h2>
 </t:dummy>

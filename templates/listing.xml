@@ -16,13 +16,11 @@
 					<li>Følg «Start en proxy»-lenken</li>
 					<li>Det startes opp en prosess på denne tjeneren som videresender ønsket kanal</li>
 					<li>Du får den hemmelige lenken til tv-kanalen i en mengde forskjellige formater</li>
-					<li>En av lenkene <em>må</em> åpnes i en mediespiller innen <em>30 sekunder</em></li>
-					<li>Mens du har kanalen åpen, kan ingen starte opp nye kanaler</li>
-					<li>Lenkene på siden slutter å virke etter at du lukker spilleren</li>
+					<li>En av lenkene <em>må</em> åpnes i en mediespiller innen <em>45 sekunder</em></li>
+					<li>Lenkene på siden slutter å virke innen 15 sekunder etter at du lukker spilleren</li>
 				</ol>
 			</li>
 		</ul>
-		<p>Du lurer også kanskje på hvem denne «engangspassord» er? Dette beskytter sikkerheten til løsningen, og betyr i praksis at du alltid må laste listing-siden på nytt etter å ha sett på en kanal</p>
 	</div>
 	<div class="left">
 		<h2 t:id="playing" style="display: none" >&#32;</h2>

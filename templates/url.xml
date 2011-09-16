@@ -19,5 +19,4 @@
 		<a t:id="html5_player">Spill i nettleser</a> - (html5 &lt;video&gt;-basert BETA!)<br />
 		<a t:id="url">Direktelenke til strømmen</a> - <strong>IKKE</strong> venstreklikk på denne lenken i nettleser!
 	</p>
-	<h2 t:id="playing" style="display: none">&#65279;</h2>
 </t:dummy>

@@ -26,9 +26,9 @@ from pyroutes.template import TemplateRenderer
 
 
 renderer = TemplateRenderer("templates/base.xml")
-# Yes, we use a global variable to hold the name of the currently
-# playing channel.
-playing = None
+# Yes, we use a global variable to hold the names of the currently
+# playing channels.
+playing = {}
 
 def random_secret():
     """
@@ -40,8 +40,7 @@ secret = random_secret()
 
 # Re-use this for waring on active channel
 ACTIVE_WARNING = u"""
-Noen ser på kanalen %s.
-Det er kun mulig å se denne kanalen for øyeblikket.
+Aktive kanaler: %s.
 """
 
 class ChannelListingError(Exception):
@@ -107,8 +106,8 @@ def listing(request):
                     + urllib2.quote(channel)}
             }
         })
-    if playing is not None:
-        template_data['#playing'] = ACTIVE_WARNING % playing
+    if playing:
+        template_data['#playing'] = ACTIVE_WARNING % ', '.join(playing.keys())
         template_data['#playing/style'] = 'color: red'
     return Response(renderer.render("templates/listing.xml", template_data))
 
@@ -119,10 +118,11 @@ class VLCMonitor(threading.Thread):
     is watching -- using /proc/<pid>/net/tcp
     """
 
-    def __init__(self, vlc, port):
+    def __init__(self, vlc, name):
         super(VLCMonitor, self).__init__()
         self.vlc = vlc
-        self.port = port
+        self.name = name
+        self.port = playing[name]
 
     def run(self):
         """ The code that is run while doing the actual monitoring """
@@ -131,10 +131,8 @@ class VLCMonitor(threading.Thread):
         while self.monitor():
             time.sleep(5)
 
-        # Reset OTP
-        global secret, playing
-        secret = random_secret()
-        playing = None
+        global playing
+        del playing[self.name]
 
         sys.stderr.write('killing vlc...')
         # ^C the process
@@ -170,22 +168,24 @@ class VLCMonitor(threading.Thread):
 def magic(request, otp=''):
     """Common VLC starting magic
 
-    Returns a HTTP URL with OTP for the running VLC process
+    Returns a HTTP URL with port and key for a running VLC process
     """
     port = 3337
     if otp != secret:
         # 4 the lulz
         # http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.3
-        return Response("""Ugyldig engangspassord.
-                G\xc3\xa5 tilbake til <a href="../listing">kanaloversikten</a>.""",
-                status_code='402 Payment Required')
+        return Response("""Ugyldig nøkkel.
+            G\xc3\xa5 tilbake til <a href="../listing">kanaloversikten</a>.""",
+                status_code=402)
     channel = urllib2.unquote(request.GET.get('ch', ''))
     if not channel in channels:
         return Response('Ugyldig eller manglende kanal',
                 status_code=500)
 
     global playing
-    if playing is None:
+    if not channel in playing:
+        while port in playing.values():
+            port += 1
         # vlc for forwarding streams is easy! ♥
         vlc = subprocess.Popen(
             ['/usr/bin/vlc',
@@ -194,8 +194,10 @@ def magic(request, otp=''):
             '--sout',
             '#std{access=http,mux=ts,dst=0.0.0.0:%d/%s}' % (port,secret)]
             )
-        playing = channels.get(stream, stream)
-        VLCMonitor(vlc, port).start()
+        playing[channel] = port
+        VLCMonitor(vlc, channel).start()
+    else:
+        port = playing.get(channel, port)
 
     return 'http://%s:%d/%s' % \
             (request.ENV['HTTP_HOST'].split(':')[0], port, secret)
@@ -248,9 +250,6 @@ def player_page(request, otp, template, attr):
     channel = urllib2.unquote(request.GET['ch'])
     template_data = {'#title': channel}
     template_data[attr] = response
-    if playing != template_data['#title'] and playing != response:
-        template_data['#playing'] = ACTIVE_WARNING % playing
-        template_data['#playing/style'] = 'color: red'
     return Response(renderer.render(template, template_data))
 
 @route('/pls')
