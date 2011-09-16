@@ -126,10 +126,10 @@ class VLCMonitor(threading.Thread):
 
     def run(self):
         """ The code that is run while doing the actual monitoring """
-        time.sleep(30)
+        time.sleep(45)
         # Wait for process exit
         while self.monitor():
-            time.sleep(5)
+            time.sleep(15)
 
         global playing
         del playing[self.name]
