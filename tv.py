@@ -225,11 +225,17 @@ def url_page(request, otp=''):
 @route('/redirect')
 def redirect_page(request, otp=''):
     """ Sleep a second and redirect to the stream. My fav. """
+    if request.ENV.get('REQUEST_METHOD', '') == 'HEAD':
+        return Redirect('/head')
     response = magic(request, otp)
     if isinstance(response, Response):
         return response
     time.sleep(1)
     return Redirect(response)
+
+@route('/head')
+def head_redirect_target(request):
+    return Response('', [('Content-type', 'application/octet-stream')])
 
 @route('/object_player')
 def object_player(request, otp=''):
