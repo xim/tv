@@ -59,11 +59,8 @@ class Channels(dict):
     """
     def __init__(self):
         super(Channels, self).__init__()
-    def get_list(self):
-        """ Get list, creating it if it doesn't exist """
-        if not self:
-            self._populate()
-        return self
+        self._populate()
+
     def _populate(self):
         """ Actually generates the channel list """
         response = urllib2.urlopen(
@@ -94,8 +91,7 @@ def main(request):
 def listing(request):
     """ Create a simple listing from the channels object """
     template_data = {'channels': []}
-    ch_copy = dict(channels.get_list())
-    for ch in sorted(ch_copy.keys(), lambda x, y: cmp(ch_copy[x], ch_copy[y])):
+    for channel in sorted(channels):
         template_data['channels'].append({'dl':
             {'dt': ch_copy[ch],
                 '#dd1': {'a': 'Start en proxy',
