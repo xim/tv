@@ -72,7 +72,7 @@ class Channels(dict):
                 name = raw_pl.pop()
                 if url.startswith('#') or not name.startswith('#EXTINF:0'):
                     raise ChannelListingError('Listing order is fucked?')
-                self[url] = name[10:]
+                self[name[10:]] = url
             except IndexError:
                 raise ChannelListingError('Channel with missing discription?')
 
@@ -92,16 +92,19 @@ def listing(request):
     """ Create a simple listing from the channels object """
     template_data = {'channels': []}
     for channel in sorted(channels):
-        template_data['channels'].append({'dl':
-            {'dt': ch_copy[ch],
-                '#dd1': {'a': 'Start en proxy',
+        template_data['channels'].append({
+            'dl': {
+                'dt': channel,
+                '#dd1': {
+                    'a': 'Start en proxy',
                     'a/href': 'http://' + request.ENV['HTTP_HOST']
                     + settings.SITE_ROOT + '/url/' + secret + '?ch='
-                    + urllib2.quote(ch)},
-                '#dd2': {'a': 'Direktelenke',
+                    + urllib2.quote(channel)},
+                '#dd2': {
+                    'a': 'Direktelenke',
                     'a/href': 'http://' + request.ENV['HTTP_HOST']
                     + settings.SITE_ROOT + '/redirect/' + secret + '?ch='
-                    + urllib2.quote(ch)}
+                    + urllib2.quote(channel)}
             }
         })
     if playing is not None:
@@ -176,14 +179,10 @@ def magic(request, otp=''):
         return Response("""Ugyldig engangspassord.
                 G\xc3\xa5 tilbake til <a href="../listing">kanaloversikten</a>.""",
                 status_code='402 Payment Required')
-    if not 'ch' in request.GET or len(request.GET['ch']) < 6:
-        return Response('Ugyldig eller manglende adresse til kanal',
-                status_code='500 Server Error')
-    stream = request.GET['ch']
-    protocol = stream[0:6]
-    if protocol != 'rtp://' and protocol != 'udp://':
-        # TODO: Replace with an MPEG
-        stream = '/home/xim/nobackup/alex_gaudino_-_destination_calabria.avi'
+    channel = urllib2.unquote(request.GET.get('ch', ''))
+    if not channel in channels:
+        return Response('Ugyldig eller manglende kanal',
+                status_code=500)
 
     global playing
     if playing is None:
@@ -191,7 +190,7 @@ def magic(request, otp=''):
         vlc = subprocess.Popen(
             ['/usr/bin/vlc',
             '-Idummy',
-            stream,
+            channels[channel],
             '--sout',
             '#std{access=http,mux=ts,dst=0.0.0.0:%d/%s}' % (port,secret)]
             )
@@ -210,9 +209,6 @@ def url_page(request, otp=''):
 
     template_data = {'#url/href': response}
     stream = request.GET['ch']
-    if playing != channels.get(stream, stream):
-        template_data['#playing'] = ACTIVE_WARNING % playing
-        template_data['#playing/style'] = 'color: red'
     for p in ['html5_player', 'object_player', 'm3u', 'pls', 'xspf', 'asx']:
         template_data['#' + p + '/href'] = '../' + p + '/' \
                 + urllib2.quote(otp) + '?ch='  + request.GET['ch']
@@ -249,8 +245,8 @@ def player_page(request, otp, template, attr):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    stream = request.GET['ch']
-    template_data = {'#title': channels.get(stream, stream)}
+    channel = urllib2.unquote(request.GET['ch'])
+    template_data = {'#title': channel}
     template_data[attr] = response
     if playing != template_data['#title'] and playing != response:
         template_data['#playing'] = ACTIVE_WARNING % playing
@@ -264,13 +260,13 @@ def pls_dl(request, otp=''):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    stream = request.GET['ch']
+    channel = request.GET['ch']
     playlist = '''[playlist]
 File1=%s
 Title1=%s
 Length1=-1
-NumberOfEntries=1''' % (response, channels.get(stream, stream))
-    return Response(playlist, default_content_header=False,
+NumberOfEntries=1''' % (response, channel)
+    return Response(playlist,
             headers=[('Content-type','audio/x-scpls'),
                  ('Content-disposition', 'attachment;filename=tv.pls')])
 
@@ -292,10 +288,10 @@ def asx_dl(request, otp=''):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    stream = request.GET['ch']
+    channel = request.GET['ch']
     template_data = {
             '#url/href': response,
-            '#title': channels.get(stream, stream)
+            '#title': channel,
             }
     return Response(
             TemplateRenderer().render("templates/asx.xml", template_data),
@@ -310,8 +306,8 @@ def xspf_dl(request, otp=''):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    stream = request.GET['ch']
-    template_data = {'#url': response, '#title': channels.get(stream, stream)}
+    channel = request.GET['ch']
+    template_data = {'#url': response, '#title': channel}
     return Response(
             TemplateRenderer().render("templates/xspf.xml", template_data),
             default_content_header=False,
