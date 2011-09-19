@@ -97,12 +97,12 @@ def listing(request):
                 '#dd1': {
                     'a': 'Start en proxy',
                     'a/href': 'http://' + request.ENV['HTTP_HOST']
-                    + settings.SITE_ROOT + '/url/' + secret + '?ch='
+                    + settings.SITE_ROOT + '/url/' + secret + '/?ch='
                     + urllib2.quote(channel)},
                 '#dd2': {
                     'a': 'Direktelenke',
                     'a/href': 'http://' + request.ENV['HTTP_HOST']
-                    + settings.SITE_ROOT + '/redirect/' + secret + '?ch='
+                    + settings.SITE_ROOT + '/redirect/' + secret + '/?ch='
                     + urllib2.quote(channel)}
             }
         })
@@ -212,8 +212,8 @@ def url_page(request, key=''):
     template_data = {'#url/href': response}
     stream = request.GET['ch']
     for p in ['html5_player', 'object_player', 'm3u', 'pls', 'xspf', 'asx']:
-        template_data['#' + p + '/href'] = '../' + p + '/' \
-                + urllib2.quote(key) + '?ch=' + request.GET['ch']
+        template_data['#' + p + '/href'] = '../../' + p + '/' \
+                + urllib2.quote(key) + '/?ch=' + request.GET['ch']
     return Response(renderer.render("templates/url.xml", template_data))
 
 @route('/redirect')
