@@ -225,7 +225,7 @@ def redirect_page(request, key=''):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    return Redirect(response)
+    return Redirect(response, [('Cache-Control','no-cache')])
 
 @route('/head')
 def head_redirect_target(request):
