@@ -73,7 +73,7 @@ class Channels(dict):
                     raise ChannelListingError('Listing order is fucked?')
                 self[name[10:]] = url
             except IndexError:
-                raise ChannelListingError('Channel with missing discription?')
+                raise ChannelListingError('Channel with missing description?')
 
 # Yes, channels are re-fetched every time the file is loaded.
 channels = Channels()
