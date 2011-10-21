@@ -220,7 +220,7 @@ def url_page(request, key=''):
 def redirect_page(request, key=''):
     """ Sleep a second and redirect to the stream. My fav. """
     if request.ENV.get('REQUEST_METHOD', '') == 'HEAD':
-        return Redirect('/head')
+        return Redirect('/head/')
     response = magic(request, key)
     if isinstance(response, Response):
         return response
