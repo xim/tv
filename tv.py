@@ -7,6 +7,7 @@ TV over python? - Oooh, the horror =)
 
 from __future__ import with_statement
 
+import HTMLParser
 import os
 import subprocess
 import sys
@@ -23,6 +24,13 @@ if 'APACHE_PID_FILE' in os.environ:
 from pyroutes import route, application, utils, settings
 from pyroutes.http.response import Response, Redirect
 from pyroutes.template import TemplateRenderer
+
+html_parser = HTMLParser.HTMLParser()
+def unescape(string):
+    return html_parser.unescape(string)
+
+def decode_request_ch(request):
+    return urllib2.unquote(request.GET.get('ch', '')).decode('utf-8')
 
 
 renderer = TemplateRenderer("templates/base.xml")
@@ -71,7 +79,7 @@ class Channels(dict):
                 name = raw_pl.pop()
                 if url.startswith('#') or not name.startswith('#EXTINF:0'):
                     raise ChannelListingError('Listing order is fucked?')
-                self[name[10:]] = url
+                self[unescape(name[10:])] = url
             except IndexError:
                 raise ChannelListingError('Channel with missing description?')
 
@@ -91,6 +99,7 @@ def listing(request):
     """ Create a simple listing from the channels object """
     template_data = {'channels': []}
     for channel in sorted(channels):
+        channel_uripart = urllib2.quote(channel.encode('utf-8'))
         template_data['channels'].append({
             'dl': {
                 'dt': channel,
@@ -98,12 +107,12 @@ def listing(request):
                     'a': 'Start en proxy',
                     'a/href': 'http://' + request.ENV['HTTP_HOST']
                     + settings.SITE_ROOT + '/url/' + secret + '/?ch='
-                    + urllib2.quote(channel)},
+                    + channel_uripart},
                 '#dd2': {
                     'a': 'Direktelenke',
                     'a/href': 'http://' + request.ENV['HTTP_HOST']
                     + settings.SITE_ROOT + '/redirect/' + secret + '/?ch='
-                    + urllib2.quote(channel)}
+                    + channel_uripart}
             }
         })
     if playing:
@@ -118,11 +127,11 @@ class VLCMonitor(threading.Thread):
     is watching -- using /proc/<pid>/net/tcp
     """
 
-    def __init__(self, vlc, name):
+    def __init__(self, vlc, channel):
         super(VLCMonitor, self).__init__()
         self.vlc = vlc
-        self.name = name
-        self.port = playing[name]
+        self.channel = channel
+        self.port = playing[channel]
 
     def run(self):
         """ The code that is run while doing the actual monitoring """
@@ -132,7 +141,7 @@ class VLCMonitor(threading.Thread):
             time.sleep(15)
 
         global playing
-        del playing[self.name]
+        del playing[self.channel]
 
         sys.stderr.write('killing vlc...')
         # ^C the process
@@ -177,7 +186,7 @@ def magic(request, key=''):
         return Response("""Ugyldig nøkkel.
             G\xc3\xa5 tilbake til <a href="../listing">kanaloversikten</a>.""",
                 status_code=402)
-    channel = urllib2.unquote(request.GET.get('ch', ''))
+    channel = decode_request_ch(request)
     if not channel in channels:
         return Response('Ugyldig eller manglende kanal',
                 status_code=500)
@@ -210,10 +219,9 @@ def url_page(request, key=''):
         return response
 
     template_data = {'#url/href': response}
-    stream = request.GET['ch']
     for p in ['html5_player', 'object_player', 'm3u', 'pls', 'xspf', 'asx']:
         template_data['#' + p + '/href'] = '../../' + p + '/' \
-                + urllib2.quote(key) + '/?ch=' + request.GET['ch']
+                + urllib2.quote(key) + '/?ch=' + decode_request_ch(request)
     return Response(renderer.render("templates/url.xml", template_data))
 
 @route('/redirect')
@@ -248,7 +256,7 @@ def player_page(request, key, template, attr):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    channel = urllib2.unquote(request.GET['ch'])
+    channel = decode_request_ch(request)
     template_data = {'#title': channel}
     template_data[attr] = response
     return Response(renderer.render(template, template_data))
@@ -260,7 +268,7 @@ def pls_dl(request, key=''):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    channel = request.GET['ch']
+    channel = decode_request_ch(request)
     playlist = '''[playlist]
 File1=%s
 Title1=%s
@@ -288,7 +296,7 @@ def asx_dl(request, key=''):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    channel = request.GET['ch']
+    channel = decode_request_ch(request)
     template_data = {
             '#url/href': response,
             '#title': channel,
@@ -305,7 +313,7 @@ def xspf_dl(request, key=''):
     if isinstance(response, Response):
         return response
     time.sleep(1)
-    channel = request.GET['ch']
+    channel = decode_request_ch(request)
     template_data = {'#url': response, '#title': channel}
     return Response(
             TemplateRenderer().render("templates/xspf.xml", template_data),
