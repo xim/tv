@@ -27,7 +27,7 @@ from pyroutes.template import TemplateRenderer
 
 html_parser = HTMLParser.HTMLParser()
 def unescape(string):
-    return html_parser.unescape(string)
+    return html_parser.unescape(string).decode('utf-8')
 
 def decode_request_ch(request):
     return urllib2.unquote(request.GET.get('ch', '')).decode('utf-8')
