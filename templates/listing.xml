@@ -27,9 +27,10 @@
 		<t:channels>
 			<dl>
 				<dt />
-				<dd t:id='dd1'><a/>,</dd>
+				<dd t:id='dd1'><a/></dd>
 				<dd t:id='dd2'><a/></dd>
 			</dl>
 		</t:channels>
 	</div>
+	<script type="text/javascript" src="/media/keyboard.js">No script</script>
 </t:dummy>

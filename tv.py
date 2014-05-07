@@ -97,7 +97,13 @@ def main(request):
 @route('/listing')
 def listing(request):
     """ Create a simple listing from the channels object """
-    template_data = {'channels': []}
+    template_data = { 'channels': [] }
+
+    if 'tv' in request.GET:
+        template_data['styles'] = [{'link/href': '/media/tv.css',
+                                    'link/rel': 'stylesheet',
+                                    'link/type': 'text/css'}]
+
     for channel in sorted(channels):
         channel_uripart = urllib2.quote(channel.encode('utf-8'))
         template_data['channels'].append({
@@ -118,6 +124,7 @@ def listing(request):
     if playing:
         template_data['#playing'] = ACTIVE_WARNING % ', '.join(playing.keys())
         template_data['#playing/style'] = 'color: red'
+
     return Response(renderer.render("templates/listing.xml", template_data))
 
 class VLCMonitor(threading.Thread):
