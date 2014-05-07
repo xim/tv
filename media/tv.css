@@ -1,0 +1,32 @@
+.right {
+  display: none;
+}
+dl {
+  margin: 1em 0;
+  height: 64px;
+  line-height: 60px;
+  clear: both;
+  text-align: right;
+}
+dd,dt {
+  display: inline-block;
+}
+dt {
+  float: left;
+  min-width: 250px;
+  text-align: left;
+}
+dt.active {
+  font-weight: bold;
+}
+dd a {
+  padding: 0 2em;
+  display: inline-block;
+  box-sizing: border-box;
+  border: 2px solid transparent;
+}
+dd a.active {
+  background: #eee;
+  outline: none;
+  border: 2px solid #ddd;
+}
